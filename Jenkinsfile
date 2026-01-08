@@ -1,25 +1,15 @@
 pipeline {
-  agent {
-    docker {
-      image 'node:18-alpine'
-      // опционально: можно добавить args, но чаще хватает environment ниже
-      // args '-u 1000:1000'
-    }
-  }
-
-  environment {
-    HOME = "${WORKSPACE}"
-    NPM_CONFIG_CACHE = "${WORKSPACE}/.npm"
-  }
+  agent { docker { image 'node:18-alpine' } }
 
   stages {
     stage('Build') {
       steps {
         sh '''
           set -eux
-          mkdir -p "$NPM_CONFIG_CACHE"
-          chmod -R u+rwX "$NPM_CONFIG_CACHE" || true
-          sh scripts/build.sh
+          export HOME="$WORKSPACE"
+          export npm_config_cache="$WORKSPACE/.npm"
+          mkdir -p "$npm_config_cache"
+          npm install --cache "$npm_config_cache"
         '''
       }
     }
